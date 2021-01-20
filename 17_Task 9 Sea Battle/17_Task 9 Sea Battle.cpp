@@ -69,17 +69,18 @@ void display(char field[10][10]) {		//отображение полей
 	}
 }
 
-bool shoot(char field[10][10], int x, int y, bool won_player) {	//выстрел и его проверка
-	int number_hit = 0;	//количество попаданий
-	bool won;
+bool shoot(char field[10][10], int x, int y, bool hit_player) {	//выстрел и его проверка
+	bool hit = hit_player;
 	if (field[x][y] == 'o') {
 		std::cout << "HIT!\n";
 		field[x][y] = 'x';
-		++number_hit;
+		hit = true;
 	}
-	else std::cout << "MISS!\n";
-	if (number_hit == 20) won = true;		//проверка победы				
-	return won;
+	else {
+		std::cout << "MISS!\n";
+		hit = false;
+	}
+	return hit;
 }
 
 int main() {
@@ -92,8 +93,11 @@ int main() {
 	int section_small = 1, section_nsmall = 2, section_middle = 3, section_big = 4; //количество секций кораблей 
 	bool won_first = false;
 	bool won_second = false;
-	std::cout << "\tGame: Sea Battle. Win only ONE!\n\n";
+	int progress = 0;
+	bool hit_first = false, hit_second = false;			//результат выстрела
+	int number_hit_first = 0, number_hit_second = 0;
 
+	std::cout << "\tGame: Sea Battle. Win only ONE!\n\n";
 	initial(field_first);		//изначальное заполнение полей
 	initial(field_second);
 	std::cout << "Arrange the ships in turn.\n\n"; //расстановка кораблей
@@ -110,20 +114,29 @@ int main() {
 	std::cout << "Second's field.\n";
 	display(field_second);
 	while (!won_first && !won_second) {	//выстрел и его проверка
-		int x, y, a = 0;
+		int x, y;
 		std::cout << "Enter coordinates shoot:\n";
 		std::cin >> x >> y;
 		if ((x < 0 || x>9) || (y < 0 || y>9)) {
 			std::cout << "Error coordinates.\n";
 			continue;
 		}
-		if (a % 2 == 0)  won_first = shoot(field_second, x, y, won_first);
-		else won_second = shoot(field_first, x, y, won_second);
+		if (progress % 2 == 0) {
+			hit_first = shoot(field_second, x, y, hit_first);
+			if (hit_first) number_hit_first++;
+			if (number_hit_first == 20) won_first = true;
+		}
+		else {
+			hit_second = shoot(field_first, x, y, hit_second);
+			if (hit_second) number_hit_second++;
+			if (number_hit_second == 20) won_second = true;
+		}
+		++progress;
 	}
 	std::cout << "First's field.\n";	//отображение полей с кораблями
 	display(field_first);
 	std::cout << "Second's field.\n";
 	display(field_second);
-	if (won_first == true)	std::cout << "Win First";
-	else if (won_second == true) std::cout << "Win Second";
+	if (won_first)	std::cout << "Win First";
+	else if (won_second) std::cout << "Win Second";
 }
